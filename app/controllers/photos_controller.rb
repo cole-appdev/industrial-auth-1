@@ -1,5 +1,7 @@
 class PhotosController < ApplicationController
   before_action :set_photo, only: %i[ show edit update destroy ]
+  before_action :ensure_current_user_is_owner, only: [ :destroy, :update, :edit]
+
 
   # GET /photos or /photos.json
   def index
@@ -38,32 +40,24 @@ class PhotosController < ApplicationController
   # PATCH/PUT /photos/1 or /photos/1.json
   def update
 
-    if current_user != @photo.owner 
-      redirect_back fallback_location: root_url, alert: "Nice try, sucker."
-    else
-      respond_to do |format|
-        if @photo.update(photo_params)
-          format.html { redirect_to @photo, notice: "Photo was successfully updated." }
-          format.json { render :show, status: :ok, location: @photo }
-        else
-          format.html { render :edit, status: :unprocessable_entity }
-          format.json { render json: @photo.errors, status: :unprocessable_entity }
-        end
+    respond_to do |format|
+      if @photo.update(photo_params)
+        format.html { redirect_to @photo, notice: "Photo was successfully updated." }
+        format.json { render :show, status: :ok, location: @photo }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @photo.errors, status: :unprocessable_entity }
       end
     end
   end
 
   # DELETE /photos/1 or /photos/1.json
   def destroy
-
-    if current_user != @photo.owner 
-      redirect_back fallback_location: root_url, alert: "Nice try, sucker."
-    else
-      @photo.destroy
-      respond_to do |format|
-        format.html { redirect_back fallback_location: root_url, notice: "Photo was successfully destroyed." }
-        format.json { head :no_content }
-      end
+    
+    @photo.destroy
+    respond_to do |format|
+      format.html { redirect_back fallback_location: root_url, notice: "Photo was successfully destroyed." }
+      format.json { head :no_content }
     end
   end
 
@@ -71,6 +65,12 @@ class PhotosController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_photo
       @photo = Photo.find(params[:id])
+    end
+
+    def ensure_current_user_is_owner
+      if current_user != @photo.owner
+        redirect_back fallback_location: root_url, alert: "You do not have authorization for this action."
+      end
     end
 
     # Only allow a list of trusted parameters through.
