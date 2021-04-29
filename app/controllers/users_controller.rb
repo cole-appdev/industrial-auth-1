@@ -16,8 +16,15 @@ class UsersController < ApplicationController
   private
 
     def set_user
+
       if params[:username]
         @user = User.find_by!(username: params.fetch(:username))
+       #if User.find_by(username: params.fetch(:username))
+       #   @user = User.find_by(username: params.fetch(:username))
+       #else
+       # redirect_back fallback_location: root_url, alert: "You're not authorized for that."
+       #end
+      
       else
         @user = current_user
       end
