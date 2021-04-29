@@ -49,28 +49,31 @@
         <% end %>
       </div>
 
-      <div class="col">
-        <%=
-          link_to "#",
-            data: { 
-              toggle: "modal", 
-              target: "##{dom_id(user)}_pending"
-            } do %>
+        <div class="col">
+          <% if current_user == @user %>
+            <%=
+              link_to "#",
+                data: { 
+                  toggle: "modal", 
+                  target: "##{dom_id(user)}_pending"
+                } do %>
 
-          <span class="font-weight-bold">
-            <%= user.pending.size %>
-          </span>
-          
-          pending
+              <span class="font-weight-bold">
+                <%= user.pending.size %>
+              </span>
+              
+              pending
 
+          <% end %>
         <% end %>
       </div>
     </div>
 
+
     <div class="row mb-3">
       <div class="col">
         <% follow_request = current_user.pending_received_follow_requests.find_by(sender: @user) %>
-
+        
         <% if follow_request %>
           <p class="lead text-center">
             <%= @user.username %> has sent you a follow request.
@@ -107,7 +110,10 @@
             <% end %>
           <% end %>
         <% else %>
-          <%= render "follow_requests/form", follow_request: @user.received_follow_requests.build %>
+          
+          <% if current_user.username != @user.username %> 
+            <%= render "follow_requests/form", follow_request: @user.received_follow_requests.build %>
+          <% end %>
         <% end %>
       </div>
     </div>
